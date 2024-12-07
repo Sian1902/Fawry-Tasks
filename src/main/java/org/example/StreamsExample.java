@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 public class StreamsExample {
 
@@ -83,18 +84,24 @@ public class StreamsExample {
                 );
         banner("Average price for all books in the library");
         // TODO With functional interfaces declared
-        Function<Book, Integer> bookToIntFunction=new Function<Book, Integer>() {
+        Function<Author,List<Book>> authorBooksFunction = new Function<Author, List<Book>>() {
             @Override
-            public Integer apply(Book book) {
-                return book.price;
+            public List<Book> apply(Author author) {
+                return author.books;
+            }
+        };
+        ToIntFunction<Book>bookToPriceFunction=new ToIntFunction<Book>() {
+            @Override
+            public int applyAsInt(Book value) {
+                return value.price;
             }
         };
         double avg= authors
                 .stream()
-                .flatMapToInt(author -> author.books
+                .flatMapToInt(author->authorBooksFunction.apply(author)
                         .stream()
-                        .mapToInt(book->book.price))
-                .average().getAsDouble();
+                        .mapToInt(bookToPriceFunction))
+                .average().orElse(0.0);
         System.out.println("Average Book Prices = "+ avg);
         banner("Average price for all books in the library - lambda");
         // TODO With functional interfaces used directly
@@ -103,7 +110,7 @@ public class StreamsExample {
                 .flatMapToInt(author -> author.books
                         .stream()
                         .mapToInt(book->book.price))
-                .average().getAsDouble();
+                .average().orElse(0.0);
         System.out.println("Average Book Prices = "+ avg);
         banner("Active authors that have at least one published book");
         // TODO With functional interfaces declared
