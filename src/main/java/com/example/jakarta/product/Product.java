@@ -1,4 +1,4 @@
-package org.example.product;
+package com.example.jakarta.product;
 
 import java.util.Objects;
 
